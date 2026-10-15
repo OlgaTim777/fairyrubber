@@ -1,0 +1,647 @@
+<div id="FX_ROOT">
+    <style>
+        #FX_ROOT {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f1b3c, #0f0c29);
+            color: #fff;
+            padding: 24px;
+            border-radius: 20px;
+            max-width: 1020px;
+            margin: auto;
+            border: 2px solid rgba(168, 85, 247, 0.5);
+            box-shadow: 0 20px 40px rgba(15, 12, 41, 0.8), inset 0 0 20px rgba(236, 72, 153, 0.15);
+        }
+        .editor-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .editor-header h2 {
+            margin: 0 0 6px 0;
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #f472b6, #c084fc, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 15px rgba(244, 114, 182, 0.4);
+            letter-spacing: 0.5px;
+        }
+        .editor-author {
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        .editor-author a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .editor-author a:hover {
+            color: #f472b6;
+            text-decoration: underline;
+        }
+        .editor-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
+        .settings-side { 
+            flex: 1; min-width: 280px; 
+            background: rgba(30, 27, 75, 0.85); 
+            padding: 20px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        .preview-side { 
+            flex: 1.5; min-width: 320px; position: relative; 
+            background: #000; border-radius: 16px; overflow: hidden; height: 520px;
+            border: 2px solid rgba(244, 63, 94, 0.4);
+            box-shadow: 0 8px 25px rgba(244, 63, 94, 0.25);
+        }
+        canvas#main-v { width: 100%; height: 100%; display: block; cursor: crosshair; }
+        .field { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; color: #cbd5e1; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select {
+            width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #6366f1;
+            background: #1e1b4b; color: #fff; box-sizing: border-box; font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+        }
+        input[type="checkbox"] { width: auto; margin-right: 8px; accent-color: #ec4899; }
+        .checkbox-label { display: flex; align-items: center; font-size: 12px; color: #fff; cursor: pointer; font-weight: 600; }
+        #res-code {
+            width: 100%; height: 75px; background: #0f0c29; color: #4ade80;
+            font-family: monospace; font-size: 10px; border: 2px solid #333355;
+            margin-top: 10px; padding: 8px; border-radius: 8px; resize: none;
+        }
+        .btn-copy {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; padding: 13px;
+            width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-copy:hover { 
+            background: linear-gradient(135deg, #4f46e5, #7c3aed); 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+        .btn-download {
+            background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; border: none; padding: 13px;
+            width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-download:hover { 
+            background: linear-gradient(135deg, #db2777, #e11d48); 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+        }
+        .preview-warning {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 12, 41, 0.85);
+            border: 1px solid rgba(244, 63, 94, 0.5);
+            color: #fca5a5;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            white-space: nowrap;
+        }
+    </style>
+
+    <div class="editor-header">
+        <h2>✨ Волшебный Ластик ✨</h2>
+        <div class="editor-author">
+            Автор: <b>Ольга Тимофеева</b> | Группа <a href="https://vk.ru/club221025676" target="_blank">«Да! Доступный Английский!»</a>
+        </div>
+    </div>
+
+    <div class="editor-wrapper">
+        <div class="settings-side">
+            <div class="field">
+                <label>1. Загрузите картинку</label>
+                <input type="file" id="i_file" accept="image/*">
+            </div>
+            <div class="field">
+                <label>2. Размер кисти</label>
+                <input type="range" id="i_bsize" min="20" max="400" value="100">
+            </div>
+            <div class="field">
+                <label>3. Время следа (сек)</label>
+                <input type="range" id="i_ftime" min="0.1" max="5" step="0.1" value="1.5">
+            </div>
+            <div class="field">
+                <label>4. Цвет затирки (фона)</label>
+                <input type="color" id="i_bg" value="#111113">
+            </div>
+            <div class="field">
+                <label>5. Эффект ластика</label>
+                <select id="i_effect">
+                    <option value="trail">Плавный шлейф (Градиент)</option>
+                    <option value="stars">Хвост из звезд</option>
+                    <option value="glitch">Глитч</option>
+                    <option value="scratch">Царапины (Скретч)</option>
+                    <option value="blots">Кляксы</option>
+                    <option value="fire">Огненный след и искры</option>
+                    <option value="ripples">Водные круги</option>
+                    <option value="dust">Магическая пыльца</option>
+                    <option value="confetti">Мыльные пузыри / Конфетти</option>
+                    <option value="neon">Неоновый лазер (RGB-glow)</option>
+                    <option value="mosaic">Пиксельный распад</option>
+                    <option value="smoke">Дым или туман</option>
+                    <option value="spotlight">Эффект лупы (Фонарик)</option>
+                </select>
+            </div>
+            <div class="field">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="i_sound" checked> 6. Звуковое сопровождение (Web Audio)
+                </label>
+            </div>
+            <button class="btn-copy" id="btn_copy">КОПИРОВАТЬ КОД</button>
+            <button class="btn-download" id="btn_download">СКАЧАТЬ HTML</button>
+            <textarea id="res-code" readonly placeholder="Код появится после выбора фото..."></textarea>
+        </div>
+        <div class="preview-side">
+            <canvas id="main-v"></canvas>
+            <div class="preview-warning">Только для личного использования. Продажа и передача третьим лицам запрещена!</div>
+        </div>
+    </div>
+
+    <script>
+    (function(){
+        const cv = document.getElementById('main-v');
+        const ctx = cv.getContext('2d');
+        const fileInput = document.getElementById('i_file');
+        const resCode = document.getElementById('res-code');
+        
+        let img = new Image();
+        let b64 = "";
+        let dots = [];
+        let hasWon = false;
+        let audioCtx = null;
+        let lastSoundTime = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playNoise(duration, volume, cutoff) {
+            if (!audioCtx) return;
+            try {
+                const bufferSize = audioCtx.sampleRate * duration;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = cutoff || 1000;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
+            } catch(e) {}
+        }
+
+        function playBrushSound(eff) {
+            if (!document.getElementById('i_sound').checked) return;
+            const now = Date.now();
+            if (now - lastSoundTime < 120) return;
+            lastSoundTime = now;
+            initAudio();
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const t = audioCtx.currentTime;
+
+                if (eff === 'stars' || eff === 'dust') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, t);
+                    osc.frequency.exponentialRampToValueAtTime(1760, t + 0.1);
+                    gain.gain.setValueAtTime(0.1, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                    osc.start(t);
+                    osc.stop(t + 0.15);
+                } else if (eff === 'fire') {
+                    playNoise(0.08, 0.08, 800);
+                } else if (eff === 'ripples' || eff === 'blots' || eff === 'confetti') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(350, t);
+                    osc.frequency.exponentialRampToValueAtTime(100, t + 0.08);
+                    gain.gain.setValueAtTime(0.15, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                    osc.start(t);
+                    osc.stop(t + 0.1);
+                } else {
+                    playNoise(0.05, 0.05, 1200);
+                }
+            } catch(e) {}
+        }
+
+        function playVictory() {
+            if (!document.getElementById('i_sound').checked) return;
+            initAudio();
+            try {
+                const t = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, t + index * 0.1);
+                    gain.gain.setValueAtTime(0.2, t + index * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + index * 0.1 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(t + index * 0.1);
+                    osc.stop(t + index * 0.1 + 0.4);
+                });
+
+                setTimeout(() => {
+                    for(let i=0; i<6; i++) {
+                        setTimeout(() => playNoise(0.12, 0.08, 700), i * 70);
+                    }
+                }, 350);
+            } catch(e) {}
+        }
+
+        // Подгонка размера холста
+        function resize() {
+            const r = cv.getBoundingClientRect();
+            if (cv.width !== r.width || cv.height !== r.height) {
+                cv.width = r.width;
+                cv.height = r.height;
+            }
+        }
+
+        // Загрузка фото
+        fileInput.onchange = (e) => {
+            hasWon = false;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                    const c = document.createElement('canvas');
+                    const maxSide = 1000;
+                    let w = tempImg.width, h = tempImg.height;
+                    if(w > maxSide || h > maxSide) {
+                        const ratio = Math.min(maxSide/w, maxSide/h);
+                        w *= ratio; h *= ratio;
+                    }
+                    c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(tempImg, 0, 0, w, h);
+                    b64 = c.toDataURL('image/jpeg', 0.7);
+                    img.src = b64;
+                    generateCode();
+                };
+                tempImg.src = ev.target.result;
+            };
+            if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+        };
+
+        function drawStar(context, cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+            context.beginPath();
+            context.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                context.lineTo(x, y);
+                rot += step;
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                context.lineTo(x, y);
+                rot += step;
+            }
+            context.lineTo(cx, cy - outerRadius);
+            context.closePath();
+            context.fill();
+        }
+
+        function renderEraser(context, xCoord, yCoord, age, bs, eff, pTime) {
+            if (eff === 'stars') {
+                context.fillStyle = 'rgba(0,0,0,' + age + ')';
+                drawStar(context, xCoord, yCoord, 5, bs / 2, bs / 4);
+            } else if (eff === 'glitch') {
+                context.fillStyle = 'rgba(0,0,0,' + (age * 0.9) + ')';
+                for(let k = 0; k < 3; k++) {
+                    let bx = xCoord + (Math.sin(pTime + k) * (bs / 3));
+                    let by = yCoord + (Math.cos(pTime * k) * (bs / 4));
+                    let bw = (bs / 4) + Math.random() * (bs / 2);
+                    let bh = 6 + Math.random() * 12;
+                    context.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
+                }
+            } else if (eff === 'scratch') {
+                context.strokeStyle = 'rgba(0,0,0,' + age + ')';
+                context.lineWidth = Math.max(2, bs / 8);
+                context.beginPath();
+                context.moveTo(xCoord - bs / 3, yCoord - bs / 3);
+                context.lineTo(xCoord + bs / 3, yCoord + bs / 3);
+                context.moveTo(xCoord + bs / 3, yCoord - bs / 3);
+                context.lineTo(xCoord - bs / 3, yCoord + bs / 3);
+                context.stroke();
+            } else if (eff === 'blots') {
+                context.fillStyle = 'rgba(0,0,0,' + age + ')';
+                context.beginPath();
+                context.arc(xCoord, yCoord, bs / 3, 0, Math.PI * 2);
+                context.arc(xCoord + bs / 4, yCoord - bs / 6, bs / 4, 0, Math.PI * 2);
+                context.arc(xCoord - bs / 5, yCoord + bs / 5, bs / 4, 0, Math.PI * 2);
+                context.fill();
+            } else if (eff === 'fire') {
+                context.fillStyle = 'rgba(255, ' + Math.floor(100 * age) + ', 0, ' + age + ')';
+                context.beginPath();
+                context.arc(xCoord + (Math.sin(pTime) * 10), yCoord - (1 - age) * 20, bs * 0.4 * age, 0, Math.PI * 2);
+                context.fill();
+                for(let s = 0; s < 3; s++) {
+                    context.fillStyle = 'rgba(255, 220, 50, ' + age + ')';
+                    context.fillRect(xCoord + Math.sin(pTime + s) * bs * 0.5, yCoord - (1 - age) * 30 + s * 5, 3, 3);
+                }
+            } else if (eff === 'ripples') {
+                const radius = (1 - age) * bs;
+                context.strokeStyle = 'rgba(255, 255, 255, ' + age + ')';
+                context.lineWidth = 3;
+                context.beginPath();
+                context.arc(xCoord, yCoord, radius, 0, Math.PI * 2);
+                context.stroke();
+            } else if (eff === 'dust') {
+                for(let d = 0; d < 4; d++) {
+                    let dx = xCoord + Math.sin(pTime + d) * (bs * 0.3);
+                    let dy = yCoord + Math.cos(pTime * d) * (bs * 0.3);
+                    context.fillStyle = 'rgba(255, 230, 150, ' + age + ')';
+                    context.beginPath();
+                    context.arc(dx, dy, (bs * 0.1) * (d + 1) / 4, 0, Math.PI * 2);
+                    context.fill();
+                }
+            } else if (eff === 'confetti') {
+                const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+                for(let cf = 0; cf < 5; cf++) {
+                    context.fillStyle = colors[cf % colors.length];
+                    let cx = xCoord + Math.sin(pTime + cf) * (bs * 0.4);
+                    let cy = yCoord + Math.cos(pTime + cf) * (bs * 0.4) - (1 - age) * 20;
+                    context.fillRect(cx, cy, bs * 0.15, bs * 0.15);
+                }
+            } else if (eff === 'neon') {
+                const hue = (pTime * 50) % 360;
+                context.strokeStyle = 'hsla(' + hue + ', 100%, 60%, ' + age + ')';
+                context.lineWidth = Math.max(4, bs * 0.15);
+                context.beginPath();
+                context.arc(xCoord, yCoord, bs * 0.4, 0, Math.PI * 2);
+                context.stroke();
+            } else if (eff === 'mosaic') {
+                const cellSize = Math.max(8, bs / 6);
+                context.fillStyle = 'rgba(0,0,0,' + age + ')';
+                for(let mx = -bs/2; mx < bs/2; mx += cellSize) {
+                    for(let my = -bs/2; my < bs/2; my += cellSize) {
+                        if(Math.hypot(mx, my) < bs/2) {
+                            context.fillRect(xCoord + mx, yCoord + my, cellSize - 2, cellSize - 2);
+                        }
+                    }
+                }
+            } else if (eff === 'smoke') {
+                const smokeRadius = bs * (0.5 + (1 - age) * 0.5);
+                const grad = context.createRadialGradient(xCoord, yCoord, 0, xCoord, yCoord, smokeRadius);
+                grad.addColorStop(0, 'rgba(150, 150, 150, ' + (age * 0.8) + ')');
+                grad.addColorStop(1, 'rgba(150, 150, 150, 0)');
+                context.fillStyle = grad;
+                context.beginPath();
+                context.arc(xCoord, yCoord, smokeRadius, 0, Math.PI * 2);
+                context.fill();
+            } else if (eff === 'spotlight') {
+                const spotGrad = context.createRadialGradient(xCoord, yCoord, 0, xCoord, yCoord, bs);
+                spotGrad.addColorStop(0, 'rgba(0,0,0,' + age + ')');
+                spotGrad.addColorStop(0.8, 'rgba(0,0,0,' + age + ')');
+                spotGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                context.fillStyle = spotGrad;
+                context.beginPath();
+                context.arc(xCoord, yCoord, bs, 0, Math.PI * 2);
+                context.fill();
+            } else {
+                const gradient = context.createRadialGradient(xCoord, yCoord, 0, xCoord, yCoord, bs / 2);
+                gradient.addColorStop(0, `rgba(0,0,0,${age})`);
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                context.fillStyle = gradient;
+                context.beginPath();
+                context.arc(xCoord, yCoord, bs / 2, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+
+        function generateCode() {
+            if(!b64) return;
+            const cfg = {
+                bs: document.getElementById('i_bsize').value,
+                ft: document.getElementById('i_ftime').value,
+                bg: document.getElementById('i_bg').value,
+                eff: document.getElementById('i_effect').value,
+                sound: document.getElementById('i_sound').checked
+            };
+
+            resCode.value = `<div style="width:100%;height:100%;position:absolute;inset:0;background:${cfg.bg};overflow:hidden;">
+<canvas style="width:100%;height:100%;display:block;cursor:crosshair;"></canvas>
+<script>
+(function(){
+const c=document.querySelector('canvas:last-of-type');const x=c.getContext('2d');let dr=[];const i=new Image();
+i.src="${b64}";
+let hasWon=false;let audioCtx=null;let lastSoundTime=0;
+function initAudio(){if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();}if(audioCtx.state==='suspended'){audioCtx.resume();}}
+function playNoise(duration,volume,cutoff){if(!audioCtx||!${cfg.sound})return;try{const bs=audioCtx.sampleRate*duration;const buf=audioCtx.createBuffer(1,bs,audioCtx.sampleRate);const d=buf.getChannelData(0);for(let k=0;k<bs;k++){d[k]=Math.random()*2-1;}const n=audioCtx.createBufferSource();n.buffer=buf;const f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=cutoff||1000;const g=audioCtx.createGain();g.gain.setValueAtTime(volume,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration);n.connect(f);f.connect(g);g.connect(audioCtx.destination);n.start();}catch(e){}}
+function playBrushSound(eff){if(!${cfg.sound})return;const now=Date.now();if(now-lastSoundTime<120)return;lastSoundTime=now;initAudio();try{const osc=audioCtx.createOscillator();const g=audioCtx.createGain();osc.connect(g);g.connect(audioCtx.destination);const t=audioCtx.currentTime;if(eff==='stars'||eff==='dust'){osc.type='sine';osc.frequency.setValueAtTime(880,t);osc.frequency.exponentialRampToValueAtTime(1760,t+0.1);g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);osc.start(t);osc.stop(t+0.15);}else if(eff==='fire'){playNoise(0.08,0.08,800);}else if(eff==='ripples'||eff==='blots'||eff==='confetti'){osc.type='sine';osc.frequency.setValueAtTime(350,t);osc.frequency.exponentialRampToValueAtTime(100,t+0.08);g.gain.setValueAtTime(0.15,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);osc.start(t);osc.stop(t+0.1);}else{playNoise(0.05,0.05,1200);}}catch(e){}}
+function playVictory(){if(!${cfg.sound})return;initAudio();try{const t=audioCtx.currentTime;const notes=[523.25,659.25,783.99,1046.50];notes.forEach((freq,index)=>{const osc=audioCtx.createOscillator();const g=audioCtx.createGain();osc.type='triangle';osc.frequency.setValueAtTime(freq,t+index*0.1);g.gain.setValueAtTime(0.2,t+index*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+index*0.1+0.4);osc.connect(g);g.connect(audioCtx.destination);osc.start(t+index*0.1);osc.stop(t+index*0.1+0.4);});setTimeout(()=>{for(let k=0;k<6;k++){setTimeout(()=>playNoise(0.12,0.08,700),k*70);}},350);}catch(e){}}
+function checkProgress(){if(hasWon||dr.length===0)return;const cols=10,rows=10;const cw=c.width/cols,ch=c.height/rows;let cleared=0;for(let r=0;r<rows;r++){for(let cl=0;cl<cols;cl++){const cx=(cl+0.5)*cw,cy=(r+0.5)*ch;if(dr.some(p=>Math.hypot(p.x-cx,p.y-cy)<${cfg.bs}*0.6))cleared++;}}if(cleared/(cols*rows)>=0.75){hasWon=true;playVictory();}}
+function rs(){const r=c.getBoundingClientRect();c.width=r.width;c.height=r.height;}
+window.addEventListener('resize',rs);rs();
+function drawStar(context,cx,cy,spikes,outerRadius,innerRadius){let rot=Math.PI/2*3;let x=cx;let y=cy;let step=Math.PI/spikes;context.beginPath();context.moveTo(cx,cy-outerRadius);for(let j=0;j<spikes;j++){x=cx+Math.cos(rot)*outerRadius;y=cy+Math.sin(rot)*outerRadius;context.lineTo(x,y);rot+=step;x=cx+Math.cos(rot)*innerRadius;y=cy+Math.sin(rot)*innerRadius;context.lineTo(x,y);rot+=step;}context.lineTo(cx,cy-outerRadius);context.closePath();context.fill();}
+function ani(){
+rs();const n=Date.now();const dur=${cfg.ft*1000};
+x.globalCompositeOperation='source-over';
+x.fillStyle='${cfg.bg}';x.fillRect(0,0,c.width,c.height);
+x.save();x.globalCompositeOperation='destination-out';
+dr=dr.filter(p=>n-p.t<dur);
+checkProgress();
+dr.forEach(p=>{
+const a=1-(n-p.t)/dur;
+const eff="${cfg.eff}";
+const bs=${cfg.bs};
+if(eff==='stars'){
+x.fillStyle='rgba(0,0,0,'+a+')';
+drawStar(x,p.x,p.y,5,bs/2,bs/4);
+}else if(eff==='glitch'){
+x.fillStyle='rgba(0,0,0,'+(a*0.9)+')';
+for(let k=0;k<3;k++){let bx=p.x+(Math.sin(p.t+k)*(bs/3));let by=p.y+(Math.cos(p.t*k)*(bs/4));let bw=(bs/4)+Math.random()*(bs/2);let bh=6+Math.random()*12;x.fillRect(bx-bw/2,by-bh/2,bw,bh);}
+}else if(eff==='scratch'){
+x.strokeStyle='rgba(0,0,0,'+a+')';x.lineWidth=Math.max(2,bs/8);x.beginPath();x.moveTo(p.x-bs/3,p.y-bs/3);x.lineTo(p.x+bs/3,p.y+bs/3);x.moveTo(p.x+bs/3,p.y-bs/3);x.lineTo(p.x-bs/3,p.y+bs/3);x.stroke();
+}else if(eff==='blots'){
+x.fillStyle='rgba(0,0,0,'+a+')';x.beginPath();x.arc(p.x,p.y,bs/3,0,Math.PI*2);x.arc(p.x+bs/4,p.y-bs/6,bs/4,0,Math.PI*2);x.arc(p.x-bs/5,p.y+bs/5,bs/4,0,Math.PI*2);x.fill();
+}else if(eff==='fire'){
+x.fillStyle='rgba(255,'+Math.floor(100*a)+',0,'+a+')';x.beginPath();x.arc(p.x+(Math.sin(p.t)*10),p.y-(1-a)*20,bs*0.4*a,0,Math.PI*2);x.fill();
+for(let s=0;s<3;s++){x.fillStyle='rgba(255,220,50,'+a+')';x.fillRect(p.x+Math.sin(p.t+s)*bs*0.5,p.y-(1-a)*30+s*5,3,3);}
+}else if(eff==='ripples'){
+const rad=(1-a)*bs;x.strokeStyle='rgba(255,255,255,'+a+')';x.lineWidth=3;x.beginPath();x.arc(p.x,p.y,rad,0,Math.PI*2);x.stroke();
+}else if(eff==='dust'){
+for(let d=0;d<4;d++){let dx=p.x+Math.sin(p.t+d)*(bs*0.3);let dy=p.y+Math.cos(p.t*d)*(bs*0.3);x.fillStyle='rgba(255,230,150,'+a+')';x.beginPath();x.arc(dx,dy,(bs*0.1)*(d+1)/4,0,Math.PI*2);x.fill();}
+}else if(eff==='confetti'){
+const colors=['#f43f5e','#3b82f6','#10b981','#f59e0b','#8b5cf6'];
+for(let cf=0;cf<5;cf++){x.fillStyle=colors[cf%colors.length];let cx=p.x+Math.sin(p.t+cf)*(bs*0.4);let cy=p.y+Math.cos(p.t+cf)*(bs*0.4)-(1-a)*20;x.fillRect(cx,cy,bs*0.15,bs*0.15);}
+}else if(eff==='neon'){
+const hue=(p.t*50)%360;x.strokeStyle='hsla('+hue+',100%,60%,'+a+')';x.lineWidth=Math.max(4,bs*0.15);x.beginPath();x.arc(p.x,p.y,bs*0.4,0,Math.PI*2);x.stroke();
+}else if(eff==='mosaic'){
+const cs=Math.max(8,bs/6);x.fillStyle='rgba(0,0,0,'+a+')';
+for(let mx=-bs/2;mx<bs/2;mx+=cs){for(let my=-bs/2;my<bs/2;my+=cs){if(Math.hypot(mx,my)<bs/2){x.fillRect(p.x+mx,p.y+my,cs-2,cs-2);}}}
+}else if(eff==='smoke'){
+const sr=bs*(0.5+(1-a)*0.5);const grad=x.createRadialGradient(p.x,p.y,0,p.x,p.y,sr);grad.addColorStop(0,'rgba(150,150,150,'+(a*0.8)+')');grad.addColorStop(1,'rgba(150,150,150,0)');x.fillStyle=grad;x.beginPath();x.arc(p.x,p.y,sr,0,Math.PI*2);x.fill();
+}else if(eff==='spotlight'){
+const sp=x.createRadialGradient(p.x,p.y,0,p.x,p.y,bs);sp.addColorStop(0,'rgba(0,0,0,'+a+')');sp.addColorStop(0.8,'rgba(0,0,0,'+a+')');sp.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=sp;x.beginPath();x.arc(p.x,p.y,bs,0,Math.PI*2);x.fill();
+}else{
+const g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,bs/2);
+g.addColorStop(0,'rgba(0,0,0,'+a+')');g.addColorStop(1,'rgba(0,0,0,0)');
+x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,bs/2,0,Math.PI*2);x.fill();
+}
+});
+x.restore();x.globalCompositeOperation='destination-over';
+if(i.complete){const s=Math.max(c.width/i.width,c.height/i.height);x.drawImage(i,(c.width-i.width*s)/2,(c.height-i.height*s)/2,i.width*s,i.height*s);}
+requestAnimationFrame(ani);
+}
+const mv=(e)=>{const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;dr.push({x:t.clientX-r.left,y:t.clientY-r.top,t:Date.now()});playBrushSound("${cfg.eff}");};
+c.onmousemove=mv;c.ontouchmove=(e)=>{mv(e);e.preventDefault();};ani();
+})();
+<\/script></div>`;
+        }
+
+        function checkProgress() {
+            if (hasWon || dots.length === 0) return;
+            const cols = 10, rows = 10;
+            const cw = cv.width / cols, ch = cv.height / rows;
+            let cleared = 0;
+            const bs = Number(document.getElementById('i_bsize').value);
+            for (let r = 0; r < rows; r++) {
+                for (let cl = 0; cl < cols; cl++) {
+                    const cx = (cl + 0.5) * cw, cy = (r + 0.5) * ch;
+                    if (dots.some(p => Math.hypot(p.x - cx, p.y - cy) < bs * 0.6)) cleared++;
+                }
+            }
+            if (cleared / (cols * rows) >= 0.75) {
+                hasWon = true;
+                playVictory();
+            }
+        }
+
+        function render() {
+            resize();
+            const now = Date.now();
+            const duration = document.getElementById('i_ftime').value * 1000;
+            const bg = document.getElementById('i_bg').value;
+            const bSize = document.getElementById('i_bsize').value;
+            const effect = document.getElementById('i_effect').value;
+
+            // 1. Очистка фона (рисуем "затирку")
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, cv.width, cv.height);
+
+            // 2. Рисуем "дырки"
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            dots = dots.filter(d => now - d.t < duration);
+            checkProgress();
+            dots.forEach(d => {
+                const age = 1 - (now - d.t) / duration;
+                renderEraser(ctx, d.x, d.y, age, bSize, effect, d.t);
+            });
+            ctx.restore();
+
+            // 3. Рисуем картинку ПОД слоем затирки
+            ctx.globalCompositeOperation = 'destination-over';
+            if(img.src) {
+                const scale = Math.max(cv.width / img.width, cv.height / img.height);
+                ctx.drawImage(img, (cv.width - img.width * scale) / 2, (cv.height - img.height * scale) / 2, img.width * scale, img.height * scale);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        cv.onmousemove = (e) => {
+            const r = cv.getBoundingClientRect();
+            dots.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: Date.now() });
+            playBrushSound(document.getElementById('i_effect').value);
+        };
+
+        cv.ontouchmove = (e) => {
+            const r = cv.getBoundingClientRect();
+            const t = e.touches[0];
+            dots.push({ x: t.clientX - r.left, y: t.clientY - r.top, t: Date.now() });
+            playBrushSound(document.getElementById('i_effect').value);
+            e.preventDefault();
+        };
+
+        document.getElementById('btn_copy').onclick = () => {
+            if(!b64) return alert("Сначала загрузите картинку");
+            resCode.select();
+            document.execCommand('copy');
+            alert("Код скопирован для Genially!");
+        };
+
+        document.getElementById('btn_download').onclick = () => {
+            if(!b64) return alert("Сначала загрузите картинку");
+            const htmlContent = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Интерактивная игра</title>
+<style>
+  body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: ${document.getElementById('i_bg').value}; }
+</style>
+</head>
+<body>
+${resCode.value}
+</body>
+</html>`;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'interactive_game.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        document.querySelectorAll('input, select').forEach(el => el.oninput = () => {
+            hasWon = false;
+            generateCode();
+        });
+        
+        render();
+    })();
+    </script>
+</div>
