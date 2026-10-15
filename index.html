@@ -528,7 +528,7 @@ x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,bs/2,0,Math.PI*2);x.fill();
 }
 });
 x.restore();x.globalCompositeOperation='destination-over';
-if(i.complete){const s=Math.max(c.width/i.width,c.height/i.height);x.drawImage(i,(c.width-i.width*s)/2,(c.height-i.height*s)/2,i.width*s,i.height*s);}
+if(i.complete){const s=Math.min(c.width/i.width,c.height/i.height);x.drawImage(i,(c.width-i.width*s)/2,(c.height-i.height*s)/2,i.width*s,i.height*s);}
 requestAnimationFrame(ani);
 }
 const mv=(e)=>{const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;dr.push({x:t.clientX-r.left,y:t.clientY-r.top,t:Date.now()});playBrushSound("${cfg.eff}");};
@@ -579,10 +579,10 @@ c.onmousemove=mv;c.ontouchmove=(e)=>{mv(e);e.preventDefault();};ani();
             });
             ctx.restore();
 
-            // 3. Рисуем картинку ПОД слоем затирки
+            // 3. Рисуем картинку ПОД слоем затирки (используем Math.min, чтобы картинка вмещалась целиком без обрезки)
             ctx.globalCompositeOperation = 'destination-over';
             if(img.src) {
-                const scale = Math.max(cv.width / img.width, cv.height / img.height);
+                const scale = Math.min(cv.width / img.width, cv.height / img.height);
                 ctx.drawImage(img, (cv.width - img.width * scale) / 2, (cv.height - img.height * scale) / 2, img.width * scale, img.height * scale);
             }
 
